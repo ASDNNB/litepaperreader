@@ -1,0 +1,19 @@
+pipeline:
+  schema: paper
+  schema_dir: litepaperreader/schemas
+  extraction_mode: mock
+  splitter_max_chars: 1000
+  splitter_overlap: 100
+
+model:
+  mode: ollama
+  name: llama3.2
+  api_base: http://localhost:11434
+
+watch:
+  dir: ./docs
+  interval: 30
+  db: litepaper_index.db
+
+logging:
+  level: INFO

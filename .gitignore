@@ -1,0 +1,47 @@
+﻿# Byte-compiled
+__pycache__/
+*.py[cod]
+*.class
+
+# Cache
+.pytest_cache/
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage
+.coverage
+htmlcov/
+coverage/
+
+# Type checking
+.mypy_cache/
+.ruff_cache/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Logs
+*.log
+webui_*.log
+*_test*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.venv
+venv/

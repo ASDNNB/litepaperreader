@@ -1,0 +1,11 @@
+template_id: paper
+description: Academic paper
+fields:
+  - name: title
+    description: The paper title
+  - name: authors
+    description: Authors of the paper
+  - name: method
+    description: Core method used
+  - name: finding
+    description: Key finding or result

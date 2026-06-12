@@ -1,0 +1,11 @@
+template_id: person
+description: Person profile
+fields:
+  - name: name
+    description: Full name of the person
+  - name: title
+    description: Job title or role
+  - name: organization
+    description: Company or institution
+  - name: expertise
+    description: Areas of expertise

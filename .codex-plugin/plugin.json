@@ -1,0 +1,22 @@
+{
+  "schema": "plugin",
+  "name": "litepaperreader",
+  "version": "1.0.0",
+  "description": "Document Intelligence Pipeline MCP Server",
+  "author": {
+    "name": "LitePaperReader"
+  },
+  "mcp_servers": [
+    {
+      "name": "litepaperreader",
+      "description": "Analyze documents, extract structured data",
+      "command": {
+        "command": "python",
+        "args": [
+          "mcp_server.py"
+        ],
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
+}

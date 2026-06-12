@@ -1,0 +1,15 @@
+# Auto-detect text files and normalize line endings to LF in the repo
+* text=auto eol=lf
+# Shell scripts must always have LF line endings
+*.sh text eol=lf
+# Python files
+*.py text eol=lf
+# PowerShell files
+*.ps1 text eol=lf
+# Batch files stay CRLF on Windows
+*.bat text eol=crlf
+# Binary artefacts
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

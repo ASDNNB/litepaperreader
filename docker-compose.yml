@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  litepaperreader:
+    build: .
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data:/data
+      - ./docs:/docs:ro
+    command: python mcp_server.py --db /data/index.db --watch-dir /docs --mode ollama

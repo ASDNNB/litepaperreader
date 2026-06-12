@@ -1,0 +1,11 @@
+template_id: product
+description: Product description
+fields:
+  - name: name
+    description: Product name
+  - name: category
+    description: Product category
+  - name: feature
+    description: Key feature
+  - name: price
+    description: Price or cost
