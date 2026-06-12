@@ -1,76 +1,38 @@
- # Contributing to LitePaperReader
+﻿# Contributing to LitePaperReader
 
- We love contributions! Here's how to get started.
+## Development Setup
 
- ## Getting Started
+```bash
+git clone https://github.com/ASDNNB/litepaperreader
+cd litepaperreader
+pip install -e .[dev]
+```
 
- 1. Fork the repository.
- 2. Clone your fork:
-    ```bash
-    git clone https://github.com/your-username/litepaperreader.git
-    cd litepaperreader
-    ```
- 3. Install development dependencies:
-    ```bash
-    pip install -e .[dev]
-    ```
- 4. Create a branch for your changes:
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
+## Code Style
 
- ## Development Guidelines
+- Type annotations required for all public functions
+- Follow PEP 8 for Python code
+- Use ``from __future__ import annotations`` at the top of every module
 
- ### Code Style
+## Testing
 
- - Follow PEP 8 conventions.
- - Use type hints for all function signatures.
- - Keep functions focused and single-purpose.
- - Write docstrings for public APIs.
+```bash
+pytest tests/ -v
+```
 
- ### Testing
+Always run tests before submitting a PR. Add tests for new features.
 
- - All new features must include tests.
- - Run the full test suite before submitting:
-   ```bash
-   pytest tests/ -v
-   ```
- - For async tests, use `pytest-asyncio`.
- - Aim for at least 80% coverage on new code.
+## Pull Request Process
 
- ### Commit Messages
+1. Branch from `master`
+2. Write tests first (test-driven development)
+3. Implement the feature or fix
+4. Ensure all tests pass
+5. Update CHANGELOG.md
+6. Submit the PR
 
- Follow [Conventional Commits](https://www.conventionalcommits.org/):
+## Architecture Notes
 
- ```
- feat(core): add cross-document relation builder
- fix(pipeline): handle empty splitter output
- docs(readme): update MCP server examples
- test(retrieval): add BM25 edge case tests
- ```
-
- ## Pull Request Process
-
- 1. Ensure all tests pass.
- 2. Update documentation if you're changing behavior.
- 3. Add a CHANGELOG entry under `[Unreleased]`.
- 4. Submit the PR against the `master` branch.
- 5. A maintainer will review and merge.
-
- ## Project Structure
-
- ```
- litepaperreader/
-   core/         — Cell types, Schema, Retrieval, Embedding
-   connectors/   — FileSystem, Git, Web source connectors
-   adapters/     — HTML, Table, Code, PDF format adapters
-   pipeline/     — DAG toolchain, Orchestrator, Splitters
-   knowledge/    — KnowledgePackage, AnswerGenerator
- tests/          — Pytest test suite
- ```
-
- ## Questions?
-
- Open a [Discussion](https://github.com/ASDNNB/litepaperreader/discussions) or an Issue.
-
- Thank you for contributing!
+Each new processing tool should subclass ``PipelineTool`` and implement ``process()``.
+New data sources need a ``SourceConnector`` + ``FormatAdapter`` pair.
+New extraction templates go in ``litepaperreader/schemas/`` as YAML files.
