@@ -129,18 +129,18 @@ flowchart TB
 
 ### 🎯 结构化提取
 - **SchemaRegistry**：从 YAML/Python 模板动态生成 Pydantic 模型
-- **4 种提取后端**：mock（关键字）、ollama（本地 LLM）、instructor（结构约束）、json（API）
+- **5 种提取后端**：mock、ollama、deepseek、instructor、json（OpenAI 兼容）
 - **跨文档分析**：RelationBuilder 自动发现跨文档的关键词和引用关系
 
 ### 🔍 检索与问答
 - **混合检索器**：BM25 词汇 + MiniLM 语义 + RRF 融合 — 无需向量数据库
-- **回答生成器**：4 种后端，回答带 Cell 级引用
+- **回答生成器**：多种后端（mock/ollama/deepseek/openai/claude），回答带 Cell 级引用
 - **知识包**：结构化卡片 + 摘要树 + 溯源映射
 
 ### 🤖 大模型集成
-- **MCP 服务**：通过 Model Context Protocol 暴露 4 个工具
+- **MCP 服务**：5 个工具 + auto 模式，透明处理大文件
 - **文件监控**：目录变化自动处理并持久化到 SQLite
-- **Python API & CLI**：程序化访问所有管道阶段
+- **统一 CLI**：`litepaper process`、`index`、`ask`、`watch`、`serve` 命令
 
 ### 🛠 运维
 - **YAML 配置**：单个 `litepaper_config.yaml` 控制所有设置

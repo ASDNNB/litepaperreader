@@ -130,18 +130,18 @@ Each Cell carries a `SourceRef` — the exact file path, line range, and process
 
 ### 🎯 Structured Extraction
 - **SchemaRegistry**: Dynamic Pydantic models from YAML / Python templates
-- **4 extraction backends**: mock (keyword), ollama (local LLM), instructor (structured), json (API)
+- **5 extraction backends**: mock, ollama, deepseek, instructor, json (OpenAI-compatible)
 - **Cross-document analysis**: RelationBuilder finds keyword and dependency links across sources
 
 ### 🔍 Retrieval & QA
 - **HybridRetriever**: BM25 lexical + MiniLM semantic with RRF fusion — no vector DB needed
-- **AnswerGenerator**: 4 backends with cell-level source citations
+- **AnswerGenerator**: multiple backends (mock/ollama/deepseek/openai/claude) with cell-level citations
 - **KnowledgePackage**: Structured cards + summary tree + provenance map
 
 ### 🤖 LLM Integration
-- **MCP Server**: 4 tools via Model Context Protocol — any MCP host can use it
+- **MCP Server**: 5 tools + auto-mode for transparent large-file processing — any MCP host can use it
 - **File Watcher**: Auto-process directory changes into a persistent SQLite index
-- **Python API & CLI**: Programmatic access to every pipeline stage
+- **Unified CLI**: `litepaper process`, `index`, `ask`, `watch`, `serve` commands
 
 ### 🛠 Operations
 - **YAML Configuration**: Single `litepaper_config.yaml` controls everything

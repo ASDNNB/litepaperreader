@@ -202,7 +202,9 @@ class SchemaExtractor(PipelineTool):
                 model=model,
                 response_format={"type": "json_object"},
                 messages=[
-                    {"role": "system", "content": prompt + chr(10)*2 + "Expected schema:" + chr(10) + json.dumps(schema)},
+                    {"role": "system", "content": (
+                        prompt + chr(10)*2 + "Expected schema:" + chr(10) + json.dumps(schema)
+                    )},
                     {"role": "user", "content": text[:8000]},
                 ],
                 temperature=0.0,

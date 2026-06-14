@@ -197,7 +197,8 @@ class HierarchicalAggregator(PipelineTool):
                 ct_counts[ct] = ct_counts.get(ct, 0) + 1
                 if isinstance(cell.body, str):
                     total_chars += len(cell.body)
-                    for kw in extract_keywords(cell.body, self.stop_words if hasattr(self, 'stop_words') else DEFAULT_STOP_WORDS):
+                    sw = self.stop_words if hasattr(self, 'stop_words') else DEFAULT_STOP_WORDS
+                    for kw in extract_keywords(cell.body, sw):
                         keyword_set.add(kw)
                 # Yield each original cell
                 yield cell
