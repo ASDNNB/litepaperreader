@@ -47,15 +47,22 @@ Documentation = "https://github.com/ASDNNB/litepaperreader"
 include-package-data = true
 
 [tool.setuptools.packages.find]
+<<<<<<< HEAD
 include = ["litepaperreader", "litepaperreader.*", "litepaper_cli"]
+=======
+include = ["litepaperreader", "litepaperreader.*"]
+>>>>>>> 6d1e6ee3a1470dda60fce0db39fd31061483d009
 exclude = ["tests*", "assets*"]
 
 [tool.setuptools.package-data]
 litepaperreader = ["schemas/*.yaml"]
 
+<<<<<<< HEAD
 [project.scripts]
 litepaper = "litepaperreader.cli:main"
 
+=======
+>>>>>>> 6d1e6ee3a1470dda60fce0db39fd31061483d009
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

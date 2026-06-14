@@ -1,33 +1,39 @@
- # Security Policy
+# Security Policy
 
- ## Supported Versions
+## Supported Versions
 
- As LitePaperReader is in active development (pre-1.0), security patches will be
- applied to the latest commit on the `master` branch.
+| Version | Supported |
+|---|---|
+| 1.0.0-dev | ✅ |
+| < 1.0.0 | ❌ |
 
- | Version | Supported |
- |---------|-----------|
- | 1.0.0-dev (master) | ✅ |
- | Older releases | ❌ |
+## Reporting a Vulnerability
 
- ## Reporting a Vulnerability
+If you discover a security vulnerability, please report it privately by opening a [security advisory](https://github.com/ASDNNB/litepaperreader/security/advisories/new).
 
- We take security seriously. If you discover a security vulnerability, please:
+Please do **not** report security vulnerabilities through public GitHub issues.
 
- 1. **Do not** open a public issue.
- 2. Email the maintainers or open a [private security advisory](https://github.com/ASDNNB/litepaperreader/security/advisories/new).
- 3. Provide a clear description of the vulnerability and steps to reproduce.
+## What to Include
 
- We will acknowledge receipt within 48 hours and strive to release a fix within
- 7 days of confirmation.
+- Type of issue (e.g., code injection, dependency vulnerability)
+- Full paths of source file(s) related to the issue
+- Steps to reproduce
+- Proof of concept (if applicable)
+- Impact assessment
 
- ## Security Considerations
+## Response Timeline
 
- - LitePaperReader processes documents from filesystem, git, and web sources.
-   Always validate the origin of input documents before processing.
- - The MCP server listens on localhost by default. If exposing to a network,
-   use a reverse proxy with authentication.
- - API keys for OpenAI and other LLM providers are handled via environment
-   variables or runtime parameters — never hardcode credentials.
- - Watch mode reads files from the filesystem. Ensure the watched directory
-   only contains trusted documents.
+- **24 hours**: Initial acknowledgment
+- **7 days**: Assessment and mitigation plan
+- **30 days**: Fix released (depending on complexity)
+
+## Security Best Practices
+
+1. **API Keys**: Use environment variables (e.g., `$OPENAI_API_KEY`), never hardcode
+2. **Local-first**: LitePaperReader processes data locally by default
+3. **File access**: The tool respects filesystem permissions; it only accesses files you explicitly provide
+4. **Network**: Optional network features (web fetching, remote models) are opt-in only
+
+## Dependencies
+
+We use automated dependency scanning via GitHub Dependabot. Vulnerable dependencies are flagged and updated promptly.

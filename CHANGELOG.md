@@ -1,29 +1,43 @@
-﻿# Changelog
+# Changelog
 
-## 1.0.0-dev (2026-06-13)
+All notable changes to LitePaperReader will be documented in this file.
 
-### Features
-- Core Cell type system with ContentType (TEXT / CODE / TABLE)
-- VirtualPurifier — interval-based dirty-data skipping without source mutation
-- SchemaRegistry — dynamic Pydantic model generation from templates
-- HybridRetriever — BM25 + MiniLM with RRF fusion
-- HTML, Table, Code, PDF format adapters
-- FileSystem, Git, Web source connectors
-- Toolchain DAG with topological ordering and parallel execution
-- DataPipeline orchestrator with ``with_schema_extractor()``
-- SchemaExtractor — 4 backends: mock, ollama, instructor, json
-- AnswerGenerator — 4 backends with cell-level citations
-- Cross-document RelationBuilder (keyword overlap + code dependency)
-- MCP Server — 4 tools via Model Context Protocol
-- PipelineDB + FileWatcher — SQLite persistence + directory monitoring
-- YAML configuration system (``litepaper_config.yaml``)
-- ProgressTracker with structured logging
-- Chinese localization (Web UI, README_CN, error hints)
-- Dockerfile + docker-compose.yml
-- CI/CD workflow (GitHub Actions)
+The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-### Tests
-- 91 tests, 4 skipped (optional dependencies)
-- Cross-document pipeline integration test
-- Schema YAML directory loading
-- Error handling tests (LitePaperError hierarchy)
+## [Unreleased]
+
+### Added
+- One-click bootstrap installer: `get-litepaperreader.py` — works on Windows/macOS/Linux
+- Windows .exe installer: build via `build_exe.py` or GitHub Actions
+- Professional README with badges, architecture diagram, and gallery
+- Chinese documentation (README_CN.md)
+- GitHub Issue/PR templates (bug report, feature request, PR checklist)
+- CI/CD workflows: cross-platform testing, linting, .exe build, PyPI release
+- `.editorconfig`, `Makefile`, `FUNDING.yml` for project standardization
+- Multi-platform GitHub Actions matrix (Windows/macOS/Linux + Python 3.11/3.12)
+
+### Changed
+- Complete README rewrite with bilingual support
+- Updated pyproject.toml with proper classifiers and metadata
+- Enhanced error handling across the codebase
+
+## [1.0.0-dev] - 2026-06-12
+
+### Added
+- Core data types: Cell, SourceRef, ContentType, StructureMeta, Relation
+- VirtualPurifier: interval-based dirty data removal
+- SchemaRegistry: dynamic Pydantic model generation from YAML/Python
+- HybridRetriever: BM25 + MiniLM + RRF fusion
+- SemanticEncoder: MiniLM and OpenAI backends
+- Source connectors: FileSystem, Git, Web
+- Format adapters: HTML, PDF, Table (CSV/XLSX), Code (tree-sitter)
+- Pipeline toolchain: DAG-based composable processing
+- SchemaExtractor: 4 backends (mock, ollama, instructor, json)
+- AnswerGenerator: 4 backends with Cell-level citations
+- KnowledgePackage: structured cards + summary tree + provenance map
+- MCP Server: 4 tools via Model Context Protocol
+- Web UI: zero-dependency browser interface
+- File watcher: directory monitoring with auto-processing
+- YAML configuration system
+- Docker support
+- 91 passing tests
