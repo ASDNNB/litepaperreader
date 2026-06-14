@@ -56,19 +56,75 @@ class CodeAdapter(FormatAdapter):
                     metadata={"function": fn_name, "lines": f"{fn_start}-{fn_end}"},
                 )
         else:
-            # Fallback: one Cell per file
-            yield Cell(
-                id=f"{ref.connector}:{checksum}:file",
-                source=source_ref,
-                content_type=ContentType.CODE,
-                body=text,
-                structure=StructureMeta(
+            # Fallback: regex-based parsing for common languages
+            parsed = self._parse_with_regex(text, lang)
+            for fn_name, fn_body, fn_start, fn_end in parsed:
+                yield Cell(
+                    id=f"{ref.connector}:{checksum}:func:{fn_name}",
+                    source=SourceRef(
+                        connector=ref.connector,
+                        resource_path=ref.resource_path,
+                        resource_checksum=checksum,
+                        span=SourceSpan(fn_start, fn_end),
+                    ),
                     content_type=ContentType.CODE,
-                    language=lang,
-                    hierarchy_level=0,
-                ),
-                metadata={"lines": len(text.splitlines()), "language": lang},
-            )
+                    body=fn_body,
+                    structure=StructureMeta(
+                        content_type=ContentType.CODE,
+                        language=lang,
+                        ast={"type": "function", "name": fn_name},
+                    ),
+                    metadata={"function": fn_name, "lines": f"{fn_start}-{fn_end}"},
+                )
+            if not parsed:
+                yield Cell(
+                    id=f"{ref.connector}:{checksum}:file",
+                    source=source_ref,
+                    content_type=ContentType.CODE,
+                    body=text,
+                    structure=StructureMeta(
+                        content_type=ContentType.CODE,
+                        language=lang,
+                        hierarchy_level=0,
+                    ),
+                    metadata={"lines": len(text.splitlines()), "language": lang},
+                )
+
+
+    @staticmethod
+    def _parse_with_regex(text: str, lang: str) -> list[tuple[str, str, int, int]]:
+        """Regex-based function/class extraction for common languages as fallback."""
+        import re
+        results: list[tuple[str, str, int, int]] = []
+        
+        if lang == 'python':
+            pattern = re.compile(r'^\s*(?:async\s+)?(?:def|class)\s+([A-Za-z_]\w*)', re.MULTILINE)
+        elif lang in ('javascript', 'typescript'):
+            pattern = re.compile(
+                r'^\s*(?:export\s+)?(?:async\s+)?(?:function\s+([A-Za-z_]\w*)|'
+                r'(?:const|let|var)\s+([A-Za-z_]\w*)\s*=\s*(?:async\s*)?[(])',
+                re.MULTILINE)
+        elif lang == 'go':
+            pattern = re.compile(r'^\s*func\s+(?:\([^)]*\)\s+)?([A-Z]\w*)\s*\(', re.MULTILINE)
+        elif lang == 'rust':
+            pattern = re.compile(r'^\s*(?:pub\s+)?fn\s+([a-z_]\w*)\s*[<(]', re.MULTILINE)
+        elif lang in ('java', 'kotlin', 'scala'):
+            pattern = re.compile(
+                r'^\s*(?:public|private|protected|static|\s)+'
+                r'(?:class|interface|object)\s+([A-Z]\w*)', re.MULTILINE)
+        else:
+            return results
+        
+        matches = list(pattern.finditer(text))
+        for i, m in enumerate(matches):
+            name = m.group(1) or m.group(2) or ''
+            if not name: continue
+            start_line = text[:m.start()].count('\n')
+            end_pos = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+            end_line = text[:end_pos].count('\n')
+            body = text[m.start():end_pos]
+            results.append((name, body.strip(), start_line, end_line))
+        return results
 
     def _parse_with_treesitter(self, text: str, lang: str) -> list[tuple[str, str, int, int]] | None:
         try:

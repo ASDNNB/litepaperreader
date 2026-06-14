@@ -153,9 +153,15 @@ class PipelineDB:
             self._conn.commit()
 
     def search_cards(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+        # Split query into words and search each independently (OR match)
+        words = [w for w in query.split() if len(w) > 1]
+        if not words:
+            words = [query]
+        conditions = " OR ".join(["fields LIKE ?" for _ in words])
+        params = [f"%{w}%" for w in words] + [limit]
         rows = self._conn.execute(
-            "SELECT * FROM cards WHERE fields LIKE ? ORDER BY rowid DESC LIMIT ?",
-            (f"%{query}%", limit),
+            f"SELECT * FROM cards WHERE ({conditions}) ORDER BY rowid DESC LIMIT ?",
+            params,
         ).fetchall()
         results = []
         for row in rows:

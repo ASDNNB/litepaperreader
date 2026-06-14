@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=65", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +10,18 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 keywords = ["document-processing", "llm", "data-pipeline", "mcp", "structured-extraction"]
-authors = [{name = "LitePaperReader"}]
+authors = [{name = "LitePaperReader Contributors"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 dependencies = [
   "pydantic>=2.7",
@@ -31,6 +42,19 @@ all = ["litepaperreader[dev,pdf,embed,code,web,yaml]"]
 Homepage = "https://github.com/ASDNNB/litepaperreader"
 Repository = "https://github.com/ASDNNB/litepaperreader"
 Documentation = "https://github.com/ASDNNB/litepaperreader"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["litepaperreader", "litepaperreader.*", "litepaper_cli"]
+exclude = ["tests*", "assets*"]
+
+[tool.setuptools.package-data]
+litepaperreader = ["schemas/*.yaml"]
+
+[project.scripts]
+litepaper = "litepaperreader.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

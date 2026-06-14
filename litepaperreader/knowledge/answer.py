@@ -66,6 +66,7 @@ class AnswerGenerator:
     MODE_OPENAI = "openai"
     MODE_CLAUDE = "claude"
     MODE_OLLAMA = "ollama"
+    MODE_DEEPSEEK = "deepseek"
 
     def __init__(
         self,
@@ -103,6 +104,8 @@ class AnswerGenerator:
             return await self._answer_claude(question, context, knowledge, resolved_mode)
         elif self._mode == self.MODE_OLLAMA:
             return await self._answer_ollama(question, context, knowledge, resolved_mode)
+        elif self._mode == self.MODE_DEEPSEEK:
+            return await self._answer_deepseek(question, context, knowledge, resolved_mode)
         else:
             raise ValueError(f"Unknown answer generator mode: {self._mode}")
 
@@ -240,6 +243,53 @@ class AnswerGenerator:
         citations = []
         for card in knowledge.cards[:5]:
             citations.append(Citation(cell_id=card.source_cell_id))
+        return Answer(
+            text=text,
+            citations=citations,
+            confidence=0.9,
+            consumption_mode=mode,
+        )
+
+
+    # ------------------------------------------------------------------
+    # DeepSeek mode (OpenAI-compatible API)
+    # ------------------------------------------------------------------
+
+    async def _answer_deepseek(
+        self, question: str, context: str, knowledge: KnowledgePackage, mode: str
+    ) -> Answer:
+        try:
+            from openai import OpenAI
+            client = OpenAI(
+                api_key=self._api_key,
+                base_url=self._api_base or "https://api.deepseek.com/v1",
+            )
+            model = self._model if self._model != "gpt-4o" else "deepseek-chat"
+            resp = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a precise document analyst. Answer the question "
+                            "based ONLY on the provided context. "
+                            "Cite sources using [Cell:cell_id] notation. "
+                            "If the context doesn\'t contain enough information, say so."
+                        ),
+                    },
+                    {"role": "user", "content": "Context:\n" + context + "\n\nQuestion: " + question},
+                ],
+                temperature=0.0,
+            )
+            text = resp.choices[0].message.content or ""
+        except ImportError:
+            logger.warning("openai not installed, falling back to mock")
+            return self._answer_mock(question, context, knowledge, mode)
+        except Exception as e:
+            logger.warning("DeepSeek API error: %s", e)
+            text = "Error calling DeepSeek API: " + str(e)
+
+        citations = [Citation(cell_id=card.source_cell_id) for card in knowledge.cards[:5]]
         return Answer(
             text=text,
             citations=citations,

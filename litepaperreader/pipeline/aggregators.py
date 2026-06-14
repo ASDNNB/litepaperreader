@@ -71,6 +71,10 @@ class RelationBuilder(PipelineTool):
             self._build_keyword_overlap(all_cells)
         elif self.strategy == "code_dependency":
             self._build_code_dependency(all_cells)
+        elif self.strategy == "entity_cooccurrence":
+            self._build_entity_cooccurrence(all_cells)
+        elif self.strategy == "citation":
+            self._build_citation_links(all_cells)
         else:
             logger.warning("Unknown strategy: %s", self.strategy)
 
@@ -115,17 +119,96 @@ class RelationBuilder(PipelineTool):
                         metadata={"referenced_name": name},
                     ))
 
+    def _build_entity_cooccurrence(self, cells: list[Cell]) -> None:
+        """Find named entities (capitalized multi-word phrases) co-occurring across docs."""
+        import re
+        entity_pattern = re.compile(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,4})\b')
+        entity_cache: dict[str, set[str]] = {}
+        for c in cells:
+            text = c.body if isinstance(c.body, str) else ""
+            entity_cache[c.id] = set(entity_pattern.findall(text))
+        for i in range(len(cells)):
+            for j in range(i + 1, len(cells)):
+                a, b = cells[i], cells[j]
+                if self._same_source(a, b):
+                    continue
+                overlap = entity_cache[a.id] & entity_cache[b.id]
+                if overlap:
+                    meta = {"shared_entities": sorted(overlap)[:5], "score": len(overlap)}
+                    a.relations.append(Relation(a.id, b.id, "entity_cooccurrence", meta.copy()))
+                    b.relations.append(Relation(b.id, a.id, "entity_cooccurrence", meta.copy()))
+
+    def _build_citation_links(self, cells: list[Cell]) -> None:
+        """Find citation patterns like [1] or (Author, 2023) across cells."""
+        import re
+        cite_pattern = re.compile(r'\[[\d,\s-]+\]|(?:\([A-Z][a-z]+,\s*\d{4}\))')
+        cite_cache: dict[str, set[str]] = {}
+        for c in cells:
+            text = c.body if isinstance(c.body, str) else ""
+            cite_cache[c.id] = set(cite_pattern.findall(text))
+        for i in range(len(cells)):
+            for j in range(i + 1, len(cells)):
+                a, b = cells[i], cells[j]
+                if self._same_source(a, b):
+                    continue
+                overlap = cite_cache[a.id] & cite_cache[b.id]
+                if overlap:
+                    meta = {"shared_citations": sorted(overlap)[:5], "score": len(overlap)}
+                    a.relations.append(Relation(a.id, b.id, "citation", meta.copy()))
+                    b.relations.append(Relation(b.id, a.id, "citation", meta.copy()))
+
     @staticmethod
     def _same_source(a: Cell, b: Cell) -> bool:
         return a.source.resource_path == b.source.resource_path
 
 
 class HierarchicalAggregator(PipelineTool):
-    """Aggregate Cells into a hierarchy (placeholder)."""
+    """Aggregate Cells into a source hierarchy with summary statistics.
+
+    Groups cells by source resource_path, builds a two-level hierarchy
+    (source -> cells), and produces per-source metadata cards.
+    """
+
     name = "hierarchical_aggregator"
     input_types: set[ContentType] | None = None
     output_type: ContentType | None = None
 
     async def process(self, cells: AsyncIterator[Cell], ctx: ToolContext) -> AsyncIterator[Cell]:
+        all_cells: list[Cell] = []
         async for cell in cells:
-            yield cell
+            all_cells.append(cell)
+
+        if not all_cells:
+            return
+
+        # Group cells by source
+        groups: dict[str, list[Cell]] = {}
+        for cell in all_cells:
+            src = cell.source.resource_path if cell.source else "unknown"
+            groups.setdefault(src, []).append(cell)
+
+        # Build per-source summary cards
+        for src_path, group in groups.items():
+            ct_counts: dict[str, int] = {}
+            total_chars = 0
+            keyword_set: set[str] = set()
+            for cell in group:
+                ct = cell.content_type.name
+                ct_counts[ct] = ct_counts.get(ct, 0) + 1
+                if isinstance(cell.body, str):
+                    total_chars += len(cell.body)
+                    for kw in extract_keywords(cell.body, self.stop_words if hasattr(self, 'stop_words') else DEFAULT_STOP_WORDS):
+                        keyword_set.add(kw)
+                # Yield each original cell
+                yield cell
+
+            # Add a summary relation to each cell in the group
+            for cell in group:
+                cell.metadata["source_stats"] = {
+                    "total_cells": len(group),
+                    "content_types": ct_counts,
+                    "total_chars": total_chars,
+                }
+
+    def __init__(self, stop_words: set[str] | None = None):
+        self.stop_words = stop_words or DEFAULT_STOP_WORDS

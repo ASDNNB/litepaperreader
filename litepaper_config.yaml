@@ -1,19 +1,31 @@
+# LitePaperReader Configuration
+# Environment variables take precedence over this file.
+# Set LITEPAPER_API_KEY to enable DeepSeek / OpenAI mode.
+
 pipeline:
-  schema: paper
-  schema_dir: litepaperreader/schemas
-  extraction_mode: mock
-  splitter_max_chars: 1000
-  splitter_overlap: 100
+  extraction_mode: mock   # mock | deepseek | ollama | instructor | json
+  model: deepseek-chat
+  api_base: https://api.deepseek.com/v1
+  # api_key: sk-...       # Prefer environment variable LITEPAPER_API_KEY
 
-model:
-  mode: ollama
-  name: llama3.2
-  api_base: http://localhost:11434
+  size_threshold: 10000    # chars; files below this pass through raw
 
-watch:
-  dir: ./docs
-  interval: 30
-  db: litepaper_index.db
+  default_template_id: auto_generic
 
-logging:
-  level: INFO
+  include_extensions:
+    - .html
+    - .htm
+    - .txt
+    - .md
+    - .csv
+    - .xlsx
+    - .py
+    - .js
+    - .ts
+    - .rs
+    - .go
+    - .java
+    - .pdf
+
+  db_path: litepaper_auto.db
+  watch_dir: ~

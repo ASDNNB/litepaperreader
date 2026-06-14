@@ -11,6 +11,9 @@ from litepaperreader.pipeline.tool import PipelineTool, ToolContext
 
 logger = logging.getLogger(__name__)
 
+DEEPSEEK_BASE = "https://api.deepseek.com/v1"
+DEEPSEEK_MODEL = "deepseek-chat"
+
 
 class SchemaExtractor(PipelineTool):
     """Extract structured fields from TEXT/TABLE Cells.
@@ -60,6 +63,7 @@ class SchemaExtractor(PipelineTool):
     MODE_OLLAMA = "ollama"
     MODE_INSTRUCTOR = "instructor"
     MODE_JSON = "json"
+    MODE_DEEPSEEK = "deepseek"
 
     def __init__(
         self,
@@ -108,6 +112,8 @@ class SchemaExtractor(PipelineTool):
             return self._extract_mock(text)
         elif self._mode == self.MODE_OLLAMA:
             return await self._extract_ollama(text)
+        elif self._mode == self.MODE_DEEPSEEK:
+            return await self._extract_deepseek(text)
         elif self._mode == self.MODE_INSTRUCTOR:
             return await self._extract_with_instructor(text)
         else:
@@ -172,6 +178,46 @@ class SchemaExtractor(PipelineTool):
         resp.raise_for_status()
         content = resp.json()["message"]["content"]
         return json.loads(content)
+
+
+    # ------------------------------------------------------------------
+    # DeepSeek mode -- OpenAI-compatible API at api.deepseek.com
+    # ------------------------------------------------------------------
+
+    async def _extract_deepseek(self, text: str) -> dict[str, Any]:
+        try:
+            from openai import OpenAI
+            client = OpenAI(
+                api_key=self._api_key,
+                base_url=self._api_base or DEEPSEEK_BASE,
+            )
+            model = self._model if self._model != "gpt-4o-mini" else DEEPSEEK_MODEL
+            schema = self._pydantic_model.model_json_schema()
+            prompt = (
+                "You are a precise structured data extractor. "
+                "Extract the requested fields from the text below. "
+                "Return ONLY valid JSON. Set fields to null if missing."
+            )
+            resp = client.chat.completions.create(
+                model=model,
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": prompt + chr(10)*2 + "Expected schema:" + chr(10) + json.dumps(schema)},
+                    {"role": "user", "content": text[:8000]},
+                ],
+                temperature=0.0,
+            )
+            content_resp = resp.choices[0].message.content
+            content_resp = resp.choices[0].message.content
+            if content_resp:
+                return json.loads(content_resp)
+            return {}
+        except ImportError:
+            logger.warning("openai not installed, falling back to mock")
+            return self._extract_mock(text)
+        except Exception as e:
+            logger.warning("DeepSeek extraction error: %s", e)
+            return self._extract_mock(text)
 
     # ------------------------------------------------------------------
     # Instructor mode -- constrained structured output

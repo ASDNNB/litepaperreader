@@ -15,6 +15,7 @@ from litepaperreader.connectors.base import ResourceRef
 from litepaperreader.core.schema import SchemaRegistry, SchemaTemplate, FieldSpec
 from litepaperreader.pipeline.orchestrator import DataPipeline
 from litepaperreader.pipeline.splitters import SemanticSplitter
+import os
 from litepaperreader.knowledge.answer import AnswerGenerator
 
 # ---------------------------------------------------------------------------
@@ -116,6 +117,13 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
     def do_POST(self):
         if self.path == "/process":
             self._handle_process()
@@ -180,6 +188,9 @@ class Handler(BaseHTTPRequestHandler):
             self._json_response({"success": True, "template_id": body["template_id"]})
         except Exception as e:
             self._json_response({"success": False, "error": str(e)}, status=400)
+
+    def log_message(self, fmt: str, *args: Any) -> None:
+        pass  # Quiet by default
 
     def _handle_list_templates(self):
         self._json_response({"templates": list(_registry.list_templates())})
